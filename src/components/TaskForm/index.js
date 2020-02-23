@@ -1,63 +1,114 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-    withStyles,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Button
-} from '@material-ui/core';
+import { withStyles, Grid, Box, Button } from '@material-ui/core';
+import { connect } from 'react-redux';
+import { compose, bindActionCreators } from 'redux';
+import { reduxForm, Field } from 'redux-form';
 import styles from './styles';
+import * as modalAction from '../../actions/modal';
+import renderTextField from '../FormHelper/TextField';
 
 class TaskFormComp extends Component {
-    handleClose = () => {
-        const { handleClose } = this.props;
-        handleClose();
-    };
+  closeModal = () => {
+    const { modalActionCreator } = this.props;
+    const { hideModal } = modalActionCreator;
+    hideModal();
+  };
 
-    render() {
-        const { open } = this.props;
-        return (
-            <Dialog
-                open={open}
-                onClose={this.handleClose}
-                aria-labelledby="form-dialog-title"
+  handleSubmitForm = values => {
+    console.log(values);
+  };
+
+  render() {
+    const { handleSubmit, classes } = this.props;
+    return (
+      <form onSubmit={handleSubmit(this.handleSubmitForm)}>
+        <Grid item md={12}>
+          {/* <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Tiêu đề"
+            type="text"
+            fullWidth
+          /> */}
+          <Field
+            id="title"
+            name="title"
+            component={renderTextField}
+            label="Tiêu đề"
+            className={classes.textField}
+            margin="normal"
+          />
+        </Grid>
+        <Grid item md={12}>
+          {/* <TextField
+            id="standard-required"
+            type="text"
+            label="Mô tả"
+            fullWidth
+          /> */}
+          <Field
+            name="description"
+            component={renderTextField}
+            id="description"
+            label="Mô tả"
+            multiline
+            rowsMax="4"
+            className={classes.textField}
+            margin="normal"
+          />
+        </Grid>
+        <Grid item md={12}>
+          <Box display="flex" flexDirection="row-reverse" mt={2}>
+            <Button variant="contained" color="primary" type="submit">
+              Save
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={this.closeModal}
             >
-                <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Email Address"
-                        type="email"
-                        fullWidth
-                    />
-                    <TextField
-                        required
-                        id="standard-required"
-                        label="Required"
-                        defaultValue="Hello World"
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={this.handleClose} color="primary">
-                        Subscribe
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
+              Cancel
+            </Button>
+          </Box>
+        </Grid>
+      </form>
+    );
+  }
 }
 
 TaskFormComp.propTypes = {
-    handleClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired
+  modalActionCreator: PropTypes.shape({
+    hideModal: PropTypes.func
+  }),
+  handleSubmit: PropTypes.func,
+  classes: PropTypes.shape({
+    textField: PropTypes.string
+  })
 };
 
-export default withStyles(styles)(TaskFormComp);
+const mapStateToProps = state => {
+  return {
+    abc: state
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    modalActionCreator: bindActionCreators(modalAction, dispatch)
+  };
+};
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+const FORM_NAME = 'TASK_MANAGEMENT';
+const withReduxForm = reduxForm({
+  form: FORM_NAME
+});
+
+export default compose(
+  withStyles(styles),
+  withConnect,
+  withReduxForm
+)(TaskFormComp);
