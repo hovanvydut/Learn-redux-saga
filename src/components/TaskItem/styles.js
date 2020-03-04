@@ -1,9 +1,12 @@
 const styles = () => ({
-    cardAction: {
-        display: 'flex',
-        alignItem: 'center',
-        justifyContent: 'flex-end'
-    }
+  card: {
+    marginTop: 10
+  },
+  cardAction: {
+    display: 'flex',
+    alignItem: 'center',
+    justifyContent: 'flex-end'
+  }
 });
 
 export default styles;

@@ -1,17 +1,28 @@
+import { toast } from 'react-toastify';
 import {
-  fork,
-  take,
   call,
-  put,
   delay,
+  fork,
+  put,
+  take,
+  takeEvery,
   takeLatest,
   select
 } from 'redux-saga/effects';
-import * as taskTypes from '../constants/task';
+import * as modalAction from '../actions/modal';
+import {
+  addTaskFailed,
+  addTaskSuccess,
+  fetchListTask,
+  fetchListTaskFailed,
+  fetchListTaskSuccess,
+  updateTaskSuccess,
+  updateTaskFailed
+} from '../actions/task';
 import * as uiAction from '../actions/ui';
-import { getList } from '../apis/task';
-import { STATUS_CODE } from '../constants/index';
-import { fetchListTaskSuccess, fetchListTaskFailed } from '../actions/task';
+import { addTask, getList, updateTask } from '../apis/task';
+import { STATUSES, STATUS_CODE } from '../constants/index';
+import * as taskTypes from '../constants/task';
 
 /*
  * B1: Thực thi action fetchTask
@@ -26,11 +37,12 @@ import { fetchListTaskSuccess, fetchListTaskFailed } from '../actions/task';
 function* watchFetchListTaskAction() {
   while (true) {
     // take action: giúp báo hiệu sắp sửa fetch data (blocking)
-    yield take(taskTypes.FETCH_TASKS);
+    const action = yield take(taskTypes.FETCH_TASKS);
+    const { params } = action.payload;
     // Hiển thị loading bằng put helper === dispatch(action) (non-blocking);
     yield put(uiAction.showLoading());
     // giúp gọi api, trả về một promise
-    const res = yield call(getList);
+    const res = yield call(getList, params);
     const { status, data } = res;
     if (status === STATUS_CODE.SUCCESS) {
       // dispatch action fetch data thanh cong
@@ -45,21 +57,66 @@ function* watchFetchListTaskAction() {
   }
 }
 
-function* filterTaskSaga({ payload }) {
+function* filterTaskSaga(action) {
   yield delay(500);
-  const keyword = payload;
-  const list = yield select(state => state.tasks.listTask);
-  const filterTask = list.filter(task =>
-    new RegExp(`\\b${keyword.toLowerCase().trim()}`, 'g').test(
-      task.title.toLowerCase()
-    )
+  const keyword = action.payload;
+  yield put(fetchListTask({ q: keyword }));
+}
+
+function* addTaskSaga(action) {
+  const { title, description } = action.payload;
+  // dispatch action to show Loading
+  yield put(uiAction.showLoading());
+  // gọi api để lưu dữ liệu vào db
+  const res = yield call(addTask, {
+    title,
+    description,
+    status: STATUSES[0].value
+  });
+  const { data, status } = res;
+
+  if (status === STATUS_CODE.CREATED) {
+    yield put(addTaskSuccess(data));
+
+    yield put(modalAction.hideModal());
+    yield delay(1000);
+    yield put(uiAction.hideLoading());
+    toast.success('Them moi thanh cong');
+  } else {
+    yield put(addTaskFailed(data));
+  }
+}
+
+function* updateTaskSaga(action) {
+  const { payload } = action;
+  const { title, description, status } = payload;
+  const taskEditing = yield select(state => state.tasks.taskEditing);
+
+  yield put(uiAction.showLoading());
+
+  const res = yield call(
+    updateTask,
+    { title, description, status },
+    taskEditing.id
   );
-  yield put(fetchListTaskSuccess(filterTask));
+  const { data, status: statusRes } = res;
+  if (statusRes === STATUS_CODE.SUCCESS) {
+    yield put(updateTaskSuccess(data));
+    toast.success('Update thanh cong');
+  } else {
+    yield put(updateTaskFailed(data));
+  }
+
+  yield put(modalAction.hideModal());
+  yield delay(1000);
+  yield put(uiAction.hideLoading());
 }
 
 function* rootSaga() {
   yield fork(watchFetchListTaskAction);
   yield takeLatest(taskTypes.FILTER_TASK, filterTaskSaga);
+  yield takeEvery(taskTypes.ADD_TASK, addTaskSaga);
+  yield takeLatest(taskTypes.UPDATE_TASK, updateTaskSaga);
 }
 
 export default rootSaga;

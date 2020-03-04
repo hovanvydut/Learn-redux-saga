@@ -1,21 +1,52 @@
 {
-  "tasks": [{
-      "id": 1,
+  "tasks": [
+    {
       "title": "Read book",
       "description": "Learning reactjs",
-      "status": 0
+      "status": "2",
+      "id": 1
     },
     {
-      "id": 2,
       "title": "Play game",
       "description": "Learning reactjs",
-      "status": 1
+      "status": "2",
+      "id": 2
     },
     {
-      "id": 3,
       "title": "Learning JAVA",
       "description": "Learning reactjs",
-      "status": 2
+      "status": "0",
+      "id": 3
+    },
+    {
+      "title": "Clone array1",
+      "description": "1231321",
+      "status": "1",
+      "id": 4
+    },
+    {
+      "title": "Create random number or string",
+      "description": "hovanvydut",
+      "status": "0",
+      "id": 5
+    },
+    {
+      "title": "Strings : changeCharactersToUppercase",
+      "description": "dfasfdas1",
+      "status": "1",
+      "id": 6
+    },
+    {
+      "title": "Strings : checkPalindrome",
+      "description": "dsdfaf",
+      "status": "2",
+      "id": 7
+    },
+    {
+      "title": "Strings : checkSubstring",
+      "description": "hhhhh",
+      "status": 0,
+      "id": 8
     }
   ]
 }

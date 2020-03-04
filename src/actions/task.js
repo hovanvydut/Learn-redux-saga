@@ -1,11 +1,15 @@
 import * as taskApi from '../apis/task';
 import * as types from '../constants/task';
+import { STATUSES } from '../constants';
 
 // action plain object
 // reset state tasks = []
-export const fetchListTask = () => {
+export const fetchListTask = (params = {}) => {
   return {
-    type: types.FETCH_TASKS
+    type: types.FETCH_TASKS,
+    payload: {
+      params
+    }
   };
 };
 
@@ -56,3 +60,72 @@ export const filterTaskSuccess = data => ({
     data
   }
 });
+
+// add task
+export const addTask = (title, description) => {
+  return {
+    type: types.ADD_TASK,
+    payload: {
+      title,
+      description
+    }
+  };
+};
+
+export const addTaskSuccess = data => {
+  return {
+    type: types.ADD_TASK_SUCCESS,
+    payload: {
+      data
+    }
+  };
+};
+
+export const addTaskFailed = error => {
+  return {
+    type: types.ADD_TASK_FAILED,
+    payload: {
+      error
+    }
+  };
+};
+
+// edit task
+export const setTaskEditing = task => {
+  return {
+    type: types.SET_TASK_EDITING,
+    payload: {
+      task
+    }
+  };
+};
+
+// update task
+export const updateTask = (title, description, status = STATUSES[0].value) => {
+  return {
+    type: types.UPDATE_TASK,
+    payload: {
+      title,
+      description,
+      status
+    }
+  };
+};
+
+export const updateTaskSuccess = data => {
+  return {
+    type: types.UPDATE_TASK_SUCCESS,
+    payload: {
+      data
+    }
+  };
+};
+
+export const updateTaskFailed = error => {
+  return {
+    type: types.UPDATE_TASK_FAILED,
+    payload: {
+      error
+    }
+  };
+};

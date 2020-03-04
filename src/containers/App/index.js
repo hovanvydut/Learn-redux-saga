@@ -15,11 +15,12 @@ const store = configStore();
 
 class App extends React.Component {
   render() {
+    const { classes } = this.props;
     return (
       <Provider store={store}>
         <ThemeProvider theme={theme}>
           <ToastContainer />
-          <TaskBoard />
+          <TaskBoard className={classes.bgDark} />
           <GlobalLoading />
           <ModalComp />
         </ThemeProvider>

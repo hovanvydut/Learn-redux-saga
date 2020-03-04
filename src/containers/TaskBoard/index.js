@@ -1,17 +1,17 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { withStyles, Grid, Button, Box } from '@material-ui/core';
+import { Box, Button, Grid, withStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { toast } from 'react-toastify';
-import styles from './styles';
-import { STATUSES } from '../../constants';
-import TaskList from '../../components/TaskList';
-import TaskFormComp from '../../components/TaskForm';
+import { bindActionCreators } from 'redux';
+import * as modalAction from '../../actions/modal';
 import * as taskAction from '../../actions/task';
 import SearchBox from '../../components/SearchBox';
-import * as modalAction from '../../actions/modal';
+import TaskFormComp from '../../components/TaskForm';
+import TaskList from '../../components/TaskList';
+import { STATUSES } from '../../constants';
+import styles from './styles';
 
 class TaskBoard extends Component {
   componentDidMount() {
@@ -21,13 +21,15 @@ class TaskBoard extends Component {
   }
 
   openForm = () => {
-    const { modalActionCreator } = this.props;
+    const { modalActionCreator, actionCreator } = this.props;
+    const { setTaskEditing } = actionCreator;
     const {
       showModal,
       changeModalContent,
       changeModalTitle
     } = modalActionCreator;
 
+    setTaskEditing(null);
     showModal();
     changeModalTitle('Thêm mới công việc');
     changeModalContent(<TaskFormComp />);
@@ -50,7 +52,22 @@ class TaskBoard extends Component {
     filterTask(keyword);
   };
 
-  // declaration function
+  handleEditTask = task => {
+    const { actionCreator, modalActionCreator } = this.props;
+    const { setTaskEditing } = actionCreator;
+    setTaskEditing(task);
+    const {
+      showModal,
+      changeModalContent,
+      changeModalTitle
+    } = modalActionCreator;
+
+    setTaskEditing(task);
+    showModal();
+    changeModalTitle('Chỉnh sửa công việc');
+    changeModalContent(<TaskFormComp />);
+  };
+
   renderSearchBox() {
     let xhtml = null;
     xhtml = <SearchBox handleChange={this.handleChangeSearchBox} />;
@@ -64,10 +81,15 @@ class TaskBoard extends Component {
       <Grid container spacing={2}>
         {STATUSES.map(status => {
           const taskFilter = listTask.filter(
-            task => task.status === status.value
+            task => Number(task.status) === status.value
           );
           return (
-            <TaskList status={status} tasks={taskFilter} key={status.value} />
+            <TaskList
+              status={status}
+              tasks={taskFilter}
+              key={status.value}
+              onClickEdit={this.handleEditTask}
+            />
           );
         })}
       </Grid>
